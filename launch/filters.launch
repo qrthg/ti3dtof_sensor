@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    
+    <env name="LC_NUMERIC" value="en_US.UTF-8" />
+    <env name="LIBGL_ALWAYS_SOFTWARE" value="1" />
+
+    <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />    
+    <node pkg="nodelet" type="nodelet" name="passthrough_y" args="load pcl/PassThrough pcl_manager" output="screen">
+        <remap from="~input"  to="/tof/raw" />
+        <remap from="~output" to="/tof/filt/y" />
+        <rosparam>
+            filter_field_name: y
+            filter_limit_min: -0.8
+            filter_limit_max: +0.8
+            filter_limit_negative: False
+        </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="passthrough_x" args="load pcl/PassThrough pcl_manager" output="screen">
+      <remap from="~input" to="/tof/filt/y" />
+      <remap from="~output" to="/tof/filt/y_x" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 0.8
+        filter_limit_max: 2.8
+        filter_limit_negative: False
+      </rosparam>
+    </node>
+    
+    <node pkg="nodelet" type="nodelet" name="noise_removal_statistical" args="load pcl/StatisticalOutlierRemoval pcl_manager" output="screen">
+      <remap from="~input" to="/tof/filt/y_x" />
+      <remap from="~output" to="/tof/filt/yx_noise" />
+      <rosparam>
+        mean_k: 4
+        stddev: 0.02
+        negative: False
+      </rosparam>
+    </node>
+        
+    <node pkg="nodelet" type="nodelet" name="noise_removal_radious" args="load pcl/RadiusOutlierRemoval pcl_manager" output="screen">
+      <remap from="~input" to="/tof/filt/yx_noise" />
+      <remap from="~output" to="/tof/filt/yx_noise_2" />
+      <rosparam>
+        search_radius_: 0.1
+        min_pts_radius_: 5
+      </rosparam>
+    </node>
+     
+</launch>

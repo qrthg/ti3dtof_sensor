@@ -10,41 +10,13 @@
     <node pkg="rosbag" type="play" name="rosbag_player_node" 
           args="$(arg bagfile) --clock -s 9 -l -r 1.0">
         <remap from="tf" to="tf_trash" />
+        <remap from="/pcl" to="/tof/raw" />
     </node>
     
     <node pkg="tf" type="static_transform_publisher" name="tf_Sensor_static_publisher"   args="0 0 0 0 0 0 map ti3dtof_frame 10" />
-    
 
-<!--    <node pkg="ti3dtof_sensor" 
-          type="ti3dtof_publisher" 
-          name="ti3dtof_publisher_node"
-          output="screen" 
-          respawn="true"
-          args="">-->
-<!--         <remap from="/pcl" to="/tof/raw" /> -->
-<!--     </node> -->
     
-    <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />    
-    <node pkg="nodelet" type="nodelet" name="passthrough_y" args="load pcl/PassThrough pcl_manager" output="screen">
-        <remap from="~input" to="/pcl" />
-        <remap from="~output" to="/tof/filt/y" />
-        <rosparam>
-            filter_field_name: y
-            filter_limit_min: -0.8
-            filter_limit_max: +0.8
-            filter_limit_negative: False
-        </rosparam>
-    </node>
-    <node pkg="nodelet" type="nodelet" name="passthrough_x" args="load pcl/PassThrough pcl_manager" output="screen">
-      <remap from="~input" to="/tof/filt/y" />
-      <remap from="~output" to="/tof/filt/yx" />
-      <rosparam>
-        filter_field_name: x
-        filter_limit_min: 0.8
-        filter_limit_max: 2.8
-        filter_limit_negative: False
-      </rosparam>
-    </node>
+    <include file="$(dirname)/filters.launch"/>
     
     <node pkg="rviz" 
           type="rviz" 
