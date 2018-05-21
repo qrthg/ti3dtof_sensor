@@ -9,6 +9,8 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/PointCloud.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/point_cloud_conversion.h>
 #include "CameraSystem.h"
 #include "grabber.h"
 #include <limits>
@@ -97,16 +99,16 @@ int main(int argc, char** argv)
     grabber->addFilter(p, DepthCamera::FRAME_RAW_FRAME_PROCESSED);
 #endif
 
-    p = grabber->createFilter("Voxel::MedianFilter", DepthCamera::FRAME_RAW_FRAME_PROCESSED);
-    if (!p) logger(LOG_ERROR) << "Failed to get MedianFilter" << std::endl;
-	p->set("deadband", 0.0f);
-    grabber->addFilter(p, DepthCamera::FRAME_RAW_FRAME_PROCESSED);
-
-    p = grabber->createFilter("Voxel::FlypixFilter", DepthCamera::FRAME_RAW_FRAME_PROCESSED);
-    if (!p) 
-        logger(LOG_ERROR) << "Failed to get FlypixFilter" << std::endl;
-    p->set("threshold", flypixThr);
-    grabber->addFilter(p, DepthCamera::FRAME_RAW_FRAME_PROCESSED);
+//     p = grabber->createFilter("Voxel::MedianFilter", DepthCamera::FRAME_RAW_FRAME_PROCESSED);
+//     if (!p) logger(LOG_ERROR) << "Failed to get MedianFilter" << std::endl;
+// 	p->set("deadband", 0.0f);
+//     grabber->addFilter(p, DepthCamera::FRAME_RAW_FRAME_PROCESSED);
+// 
+//     p = grabber->createFilter("Voxel::FlypixFilter", DepthCamera::FRAME_RAW_FRAME_PROCESSED);
+//     if (!p) 
+//         logger(LOG_ERROR) << "Failed to get FlypixFilter" << std::endl;
+//     p->set("threshold", flypixThr);
+//     grabber->addFilter(p, DepthCamera::FRAME_RAW_FRAME_PROCESSED);
 
     // Start ToF camera
     grabber->start();
@@ -115,7 +117,7 @@ int main(int argc, char** argv)
     if (laserTopic.c_str())
         laser_pub = n.advertise<sensor_msgs::LaserScan>(laserTopic.c_str(), 1);
     if (pclTopic.c_str())
-        cloud_pub = n.advertise<sensor_msgs::PointCloud>(pclTopic.c_str(), 1);
+        cloud_pub = n.advertise<sensor_msgs::PointCloud2>(pclTopic.c_str(), 1);
 
     int count = 0;
     ros::Rate r(frameRate);
@@ -132,6 +134,7 @@ int main(int argc, char** argv)
     laser.intensities.resize(width);
 
     sensor_msgs::PointCloud cloud;
+    sensor_msgs::PointCloud2 cloud2;
     cloud.header.frame_id = laser.header.frame_id;
 
     while(n.ok())
@@ -208,7 +211,8 @@ int main(int argc, char** argv)
                         } 
                     }
 
-                    cloud_pub.publish(cloud);
+                    sensor_msgs::convertPointCloudToPointCloud2(cloud, cloud2);
+                    cloud_pub.publish(cloud2);
 
                 } // if (pclFrame)
             }
