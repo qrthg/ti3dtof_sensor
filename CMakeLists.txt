@@ -31,9 +31,10 @@ add_definitions(${PCL_DEFINITIONS})
 ##==============================================================================
 ## Add Voxel support defines 
 ##==============================================================================
-set(VOXEL_INCLUDE_DIRS "." /usr/include/voxel /usr/include/voxel/pcl /usr/include/voxel/ti3dtof /usr/include/voxel/Filter )
+# set(VOXEL_INCLUDE_DIRS "." /usr/include/voxel /usr/include/voxel/pcl /usr/include/voxel/ti3dtof /usr/include/voxel/Filter )
+set(VOXEL_INCLUDE_DIRS "." /usr/local/include/voxel /usr/local/include/voxel/pcl /usr/local/include/voxel/ti3dtof /usr/local/include/voxel/Filter )
 
-set(VOXEL_LIBRARIES /usr/lib/libti3dtof.so /usr/lib/libvoxel.so X11 ${OpenCV_LIBS} ${VOXEL_LIBRARIES} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${PCL_VISUALIZATION_LIBRARIES})
+set(VOXEL_LIBRARIES /usr/local/lib/libti3dtof.so /usr/local/lib/libvoxel.so X11 ${OpenCV_LIBS} ${VOXEL_LIBRARIES} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${PCL_VISUALIZATION_LIBRARIES})
 
 ##==============================================================================
 ## Uncomment this if the package has a setup.py. This macro ensures
