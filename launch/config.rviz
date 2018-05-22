@@ -8,6 +8,7 @@ Panels:
         - /Status1
         - /PointCloud21
         - /PointCloud22
+        - /Axes1
       Splitter Ratio: 0.5
     Tree Height: 895
   - Class: rviz/Selection
@@ -75,7 +76,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Flat Squares
-      Topic: /tof/filt/y_x
+      Topic: /tof/raw
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -92,10 +93,10 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 0.0617675781
+      Max Intensity: 0.0490722656
       Min Color: 0; 0; 0
       Min Intensity: 0.000244140625
       Name: PointCloud2
@@ -105,10 +106,47 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.0149999997
       Style: Flat Squares
-      Topic: /tof/filt/y_x
+      Topic: /tof/passthrough/y_x
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: false
+      Value: false
+    - Class: rviz/Axes
+      Enabled: true
+      Length: 0.200000003
+      Name: Axes
+      Radius: 0.0199999996
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 0.033203125
+      Min Color: 0; 0; 0
+      Min Intensity: 0.000244140625
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.00999999978
+      Style: Flat Squares
+      Topic: /tof/seg/y_x_1
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
       Value: true
   Enabled: true
   Global Options:
@@ -135,25 +173,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.32418633
+      Distance: 3.87815213
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 2.16021729
-        Y: 0.167118013
-        Z: -0.457407475
+        X: 2.16596413
+        Y: -0.393594414
+        Z: -0.522871673
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.58020395
+      Pitch: 0.060204234
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.22844172
+      Yaw: 3.23343992
     Saved: ~
 Window Geometry:
   Displays:

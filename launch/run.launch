@@ -4,7 +4,9 @@
     <env name="LC_NUMERIC" value="en_US.UTF-8" />
     <env name="LIBGL_ALWAYS_SOFTWARE" value="1" />
 
-    <arg name="VOXEL_SDK_PATH" default="/usr/local" doc="lidar frame"/>
+    <!-- See https://github.com/3dtof/voxelsdk -->
+    <arg name="VOXEL_SDK_PATH" default="/usr/local" doc="voxelsdk installation path"/>
+    
     
     <!-- set a few environment variables  -->
     <env name="VOXEL_SDK_PATH" value="$(arg VOXEL_SDK_PATH)" />
@@ -14,7 +16,6 @@
     
     <node pkg="tf" type="static_transform_publisher" name="tf_Sensor_static_publisher"   args="0 0 0 0 0 0 map ti3dtof_frame 10" />
     
-
     <node pkg="ti3dtof_sensor" 
           type="ti3dtof_publisher" 
           name="ti3dtof_publisher_node"
@@ -22,8 +23,34 @@
           required="True"
           args="">
          <remap from="/pcl" to="/tof/raw" /> 
+         <param name="scan" value=""/>
+         <param name="rate" value="5"/>
+         <param name="hfov" value="74"/>
+         <param name="vfov" value="59"/>
+         <param name="width" value="320"/>
+         <param name="height" value="240"/>
+         <param name="profile" value="MetrilusLongRange"/>
+<!--          <param name="profile" value="Long Range"/> -->
+         <param name="TemporalMedianFilter/order" value="0"/>
+         <param name="MedianFilter/halfKernelSize" value="0"/>
+         <param name="FlypixFilter/threshold" value="500.0"/>
+         <param name="BilateralFilter/sigma" value="0.0"/>
+         <param name="DarkPixFilter/enable" value="False"/>
+         
      </node> 
-     
+        
+    <node
+        pkg="pointcloud_filter"
+        type="ground_seg_node"
+        name="seg_segmenter_noder"
+        output="screen"
+        respawn="true" >
+        <remap from="cloud_in" to="/tof/passthrough/y_x" />
+        <remap from="cloud_out" to="/tof/seg/y_x_1" />
+        <remap from="cloud_gnd_out" to="/tof/seg/y_x_2" />
+                
+    </node>
+    
     <include file="$(dirname)/filters.launch"/>
     
     <node pkg="rviz" 
@@ -32,7 +59,6 @@
           output="screen" 
           respawn="true"
           args="-d $(dirname)/../launch/config.rviz">
-        
     </node>
      
 </launch>

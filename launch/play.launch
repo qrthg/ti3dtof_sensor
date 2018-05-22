@@ -24,7 +24,6 @@
           output="screen" 
           respawn="true"
           args="-d $(dirname)/../launch/config.rviz">
-        
     </node>
     
 </launch>

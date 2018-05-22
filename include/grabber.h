@@ -166,6 +166,8 @@ public:
             stop();
     }
 
+    virtual void printCalibration();
+    virtual void printSupportedFilters();
 };
 
 

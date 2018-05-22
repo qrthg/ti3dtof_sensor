@@ -319,21 +319,37 @@ bool Grabber::setProfile(Voxel::String name)
     {
         std::cout << "Checking (" << p.second << ") against name (" << name << ")" << std::endl;
 
-        if (p.second == name) 
+        ConfigurationFile *c = 
+            _depthCamera->configFile.getCameraProfile(p.first);
+        if (c) 
         {
-            int profile_id = p.first;
-            
-            ConfigurationFile *c = 
-                _depthCamera->configFile.getCameraProfile(p.first);
+            if(c->getLocation() == ConfigurationFile::IN_CAMERA)
+                std::cout << "Profile in camera! " << p.second << std::endl;
                 
-            if (c && c->getLocation() == ConfigurationFile::IN_CAMERA) 
+            if (p.second == name) 
             {
-                if (_depthCamera->setCameraProfile(profile_id)) 
+                std::cout << "Found profile: " << name << std::endl;
+                int profile_id = p.first;
+                
+            
+                if(c->getLocation() == ConfigurationFile::IN_CAMERA) 
                 {
-                    rc = true;
-                    break;
+                    if (_depthCamera->setCameraProfile(profile_id)) 
+                    {
+                        rc = true;
+                        break;
+                    }
+                    else {
+                        std::cout << "Warning: Failed to set profile." << std::endl;   
+                    }
+                }
+                else {
+                    std::cout << "Warning: Config file is not in camera." << std::endl;  
                 }
             }
+        }
+        else {
+            std::cout << "Warning: Failed to find config file." << std::endl;   
         }
     }
     return rc;
@@ -447,6 +463,40 @@ void Grabber::_callback(DepthCamera &depthCamera, const Frame &frame,
         logger(LOG_ERROR) << "Grabber: unknown callback type: " << type << endl;
     }
 }
+
+void Grabber::printCalibration() 
+{
+    const Map<String, CalibrationInformation> &info = _depthCamera->configFile.getCalibrationInformation();
+
+    std::cout << std::endl << "======================" << std::endl;
+    std::cout << std::endl << "  Camera calibration" << std::endl;
+    for(auto &e: info)
+    {
+        std::cout << std::endl << "=================" << std::endl;
+        std::cout << "Calibration name = " << e.second.name << " with id = " << e.second.id << std::endl;
+        
+        std::cout << "Defining parameters = ";
+        for(auto &d: e.second.definingParameters)
+            std::cout << d << " ";
+        std::cout << std::endl;
+
+        std::cout << "Calibration parameters = ";
+        for(auto &c: e.second.calibrationParameters)
+            std::cout << c << " ";
+        std::cout << std::endl;
+    }
+}
+
+void Grabber::printSupportedFilters()
+{
+    std::cout << std::endl << "======================" << std::endl;
+    std::cout << "Supported filters: " << std::endl;
+    std::vector<String> vSupportedFilters = getSupportedFilters();
+    for(int i=0; i < vSupportedFilters.size(); i++){
+        std::cout << "     " << vSupportedFilters[i] << std::endl;
+    }
+}
+
 
 
 
