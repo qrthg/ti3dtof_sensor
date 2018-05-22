@@ -4,6 +4,14 @@
     <env name="LC_NUMERIC" value="en_US.UTF-8" />
     <env name="LIBGL_ALWAYS_SOFTWARE" value="1" />
 
+    <arg name="VOXEL_SDK_PATH" default="/usr/local" doc="lidar frame"/>
+    
+    <!-- set a few environment variables  -->
+    <env name="VOXEL_SDK_PATH" value="$(arg VOXEL_SDK_PATH)" />
+    <env name="LD_LIBRARY_PATH" value="$(env LD_LIBRARY_PATH):$(arg VOXEL_SDK_PATH)/lib" />
+    <env name="PYTHONPATH" value="$(arg VOXEL_SDK_PATH)/lib/python2.7:$(env PYTHONPATH)" />
+    <env name="PATH" value="$(arg VOXEL_SDK_PATH)/bin:$(env PATH)" />
+    
     <node pkg="tf" type="static_transform_publisher" name="tf_Sensor_static_publisher"   args="0 0 0 0 0 0 map ti3dtof_frame 10" />
     
 
@@ -11,7 +19,7 @@
           type="ti3dtof_publisher" 
           name="ti3dtof_publisher_node"
           output="screen" 
-          respawn="true"
+          required="True"
           args="">
          <remap from="/pcl" to="/tof/raw" /> 
      </node> 
@@ -26,10 +34,5 @@
           args="-d $(dirname)/../launch/config.rviz">
         
     </node>
-  <!--
-    <node pkg='rqt_plot'
-          type='rqt_plot'  
-          name='rqt_plot_qad' 
-          args='mti/sensor/imu'/> -->
      
 </launch>

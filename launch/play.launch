@@ -26,10 +26,5 @@
           args="-d $(dirname)/../launch/config.rviz">
         
     </node>
-  <!--
-    <node pkg='rqt_plot'
-          type='rqt_plot'  
-          name='rqt_plot_qad' 
-          args='mti/sensor/imu'/> -->
-     
+    
 </launch>
