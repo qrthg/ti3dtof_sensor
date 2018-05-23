@@ -9,6 +9,7 @@ Panels:
         - /PointCloud21
         - /PointCloud22
         - /Axes1
+        - /PointCloud23
       Splitter Ratio: 0.5
     Tree Height: 895
   - Class: rviz/Selection
@@ -93,10 +94,10 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 0.0490722656
+      Max Intensity: 0.0529785156
       Min Color: 0; 0; 0
       Min Intensity: 0.000244140625
       Name: PointCloud2
@@ -110,7 +111,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: false
-      Value: false
+      Value: true
     - Class: rviz/Axes
       Enabled: true
       Length: 0.200000003
@@ -143,10 +144,18 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Flat Squares
-      Topic: /tof/seg/y_x_1
+      Topic: /tof/seg/cyl
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /cyl_info
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
@@ -188,10 +197,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.060204234
+      Pitch: 0.365204483
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.23343992
+      Yaw: 2.55844092
     Saved: ~
 Window Geometry:
   Displays:

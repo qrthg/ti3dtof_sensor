@@ -17,9 +17,9 @@
         filter_limit_negative: False
       </rosparam>
     </node>
-    <node pkg="nodelet" type="nodelet" name="passthrough_x" args="load pcl/PassThrough pcl_manager" output="screen">
+    <node pkg="nodelet" type="nodelet" name="passthrough_Z" args="load pcl/PassThrough pcl_manager" output="screen">
       <remap from="~input" to="/tof/passthrough/y" />
-      <remap from="~output" to="/tof/passthrough/y_x" />
+      <remap from="~output" to="/tof/passthrough/y_x_z" />
       <rosparam>
         filter_field_name: x
         filter_limit_min: 0.8
@@ -27,7 +27,28 @@
         filter_limit_negative: False
       </rosparam>
     </node>
+    <node pkg="nodelet" type="nodelet" name="passthrough_x" args="load pcl/PassThrough pcl_manager" output="screen">
+      <remap from="~input" to="/tof/passthrough/y_x_z" />
+      <remap from="~output" to="/tof/passthrough/y_x" />
+      <rosparam>
+        filter_field_name: z
+        filter_limit_min: -0.7
+        filter_limit_max: 2.5
+        filter_limit_negative: False
+      </rosparam>
+    </node>
     
+    <node
+        pkg="segmentation"
+        type="cylinder_seg_node"
+        name="cylinder_seg_node"
+        output="screen"
+        respawn="true" >
+        <remap from="cloud_in" to="/tof/passthrough/y_x" />
+        <remap from="cloud_cyl_out" to="/tof/seg/cyl" />
+        <remap from="cloud_other_out" to="/tof/seg/non_cyl" />
+                
+    </node>
 <!--    <node pkg="nodelet" type="nodelet" name="noise_removal_statistical" args="load pcl/StatisticalOutlierRemoval pcl_manager" output="screen">
         <remap from="~input"  to="/tof/passthrough/y_x" />
       <remap from="~output" to="/tof/filt/StatisticalOutlierRemoval" />

@@ -23,6 +23,7 @@
           required="True"
           args="">
          <remap from="/pcl" to="/tof/raw" /> 
+         
          <param name="scan" value=""/>
          <param name="rate" value="5"/>
          <param name="hfov" value="74"/>
@@ -38,19 +39,7 @@
          <param name="DarkPixFilter/enable" value="False"/>
          
      </node> 
-        
-    <node
-        pkg="pointcloud_filter"
-        type="ground_seg_node"
-        name="seg_segmenter_noder"
-        output="screen"
-        respawn="true" >
-        <remap from="cloud_in" to="/tof/passthrough/y_x" />
-        <remap from="cloud_out" to="/tof/seg/y_x_1" />
-        <remap from="cloud_gnd_out" to="/tof/seg/y_x_2" />
-                
-    </node>
-    
+            
     <include file="$(dirname)/filters.launch"/>
     
     <node pkg="rviz" 
