@@ -24,15 +24,15 @@ find_package(PCL 1.7 REQUIRED COMPONENTS common io visualization)
 find_package(OpenCV REQUIRED)
 
 ##==============================================================================
-## Add support for PCL 
+## Add support for PCL
 ##==============================================================================
 add_definitions(${PCL_DEFINITIONS})
 
 ##==============================================================================
-## Add Voxel support defines 
+## Add Voxel support defines
 ##==============================================================================
 # set(VOXEL_INCLUDE_DIRS "." /usr/include/voxel /usr/include/voxel/pcl /usr/include/voxel/ti3dtof /usr/include/voxel/Filter )
-set(VOXEL_INCLUDE_DIRS "." /usr/local/include/voxel /usr/local/include/voxel/pcl /usr/local/include/voxel/ti3dtof /usr/local/include/voxel/Filter )
+set(VOXEL_INCLUDE_DIRS "." /usr/local/include/voxel-0.6.11 /usr/local/include/voxel-0.6.11/pcl /usr/local/include/voxel-0.6.11/ti3dtof /usr/local/include/voxel-0.6.11/Filter )
 
 set(VOXEL_LIBRARIES /usr/local/lib/libti3dtof.so /usr/local/lib/libvoxel.so X11 ${OpenCV_LIBS} ${VOXEL_LIBRARIES} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${PCL_VISUALIZATION_LIBRARIES})
 
@@ -158,10 +158,10 @@ message("INCLUDE_DIRS=" ${INCLUDE_DIRS})
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  ${VOXEL_INCLUDE_DIRS} 
-  ${PCL_INCLUDE_DIRS} 
+  ${VOXEL_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
   ${EIGEN_INCLUDE_DIRS}
-  ./include 
+  ./include
 )
 
 ##==============================================================================
