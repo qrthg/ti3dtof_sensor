@@ -31,7 +31,7 @@
          <param name="width" value="320"/>
          <param name="height" value="240"/>
          <param name="profile" value="MetrilusLongRange"/>
-<!--          <param name="profile" value="Long Range"/> -->
+<!--          <param name="profile" value="MetrilusShortRange"/> -->
          <param name="TemporalMedianFilter/order" value="0"/>
          <param name="MedianFilter/halfKernelSize" value="0"/>
          <param name="FlypixFilter/threshold" value="500.0"/>
