@@ -11,6 +11,7 @@
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud_conversion.h>
+#include <sensor_msgs/Image.h>
 #include "CameraSystem.h"
 #include "grabber.h"
 #include <limits>
@@ -25,20 +26,20 @@ int main(int argc, char** argv)
     std::map< String, Grabber* > _connected;
     int width, height;
 
-    // Find all attached cameras 
-    if (_device.size() <= 0) 
+    // Find all attached cameras
+    if (_device.size() <= 0)
     {
         ROS_ERROR("No camera connected.");
         return -1;
     }
 
     DepthCameraPtr dc = _sys.connect(_device[0]);
-    
+
     // Setup ROS
     ros::NodeHandle n;
-    ros::Publisher laser_pub, cloud_pub;
+    ros::Publisher laser_pub, cloud_pub, image_pub, image_intensity_pub;
 
-    std::string laserTopic, pclTopic, profileName;
+    std::string laserTopic, pclTopic, profileName, depthTopic, intensityTopic;
     float hfov, vfov;
     float frameRate;
     int hStart, hEnd;
@@ -53,6 +54,8 @@ int main(int argc, char** argv)
     ros::NodeHandle priv_n("~");
     priv_n.param("laser", laserTopic, std::string("scan"));
     priv_n.param("pcl", pclTopic, std::string("pcl"));
+    priv_n.param("image", depthTopic, std::string("depth"));
+    priv_n.param("image_intensity", intensityTopic, std::string("intensity"));
     priv_n.param("hfov", hfov, 74.2f);
     priv_n.param("vfov", vfov, 58.1f);
     priv_n.param("rate", frameRate, 30.0f);
@@ -67,7 +70,7 @@ int main(int argc, char** argv)
     halfKernelSize = (uint)tmp;
     priv_n.param("BilateralFilter/sigma", sigma, 0.0f);
     priv_n.param("DarkPixFilter/enable", bDarkPixEnable, false);
-    
+
     priv_n.param("gain", gain, 1.0f);
     priv_n.param("width", width, 160);
     priv_n.param("height", height, 120);
@@ -100,10 +103,10 @@ int main(int argc, char** argv)
     Grabber *grabber = new Grabber(dc, dim, Grabber::FRAMEFLAG_ALL, _sys);
     grabber->setProfile(profileName);
     std::cout << "Used camera profile name = " << grabber->getCurrentProfileName() << std::endl;
-    
+
     grabber->printCalibration();
     grabber->printSupportedFilters();
-    
+
     // Setup ToF filters
     std::cout << std::endl << "========================" << std::endl;
     std::cout << "  Adding filters:  " << std::endl;
@@ -112,7 +115,7 @@ int main(int argc, char** argv)
         std::cout << "Adding temporal median filter, order:  " << order << std::endl;
         p = grabber->createFilter("Voxel::TemporalMedianFilter",
                     DepthCamera::FRAME_RAW_FRAME_PROCESSED);
-        if (!p) 
+        if (!p)
             logger(LOG_ERROR) << "Failed to get TemporalMedianFilter" << std::endl;
         p->set("deadband", 0.0f);
         p->set("order", (uint)order);
@@ -121,7 +124,7 @@ int main(int argc, char** argv)
     if(halfKernelSize > 0) {
         std::cout << "Adding median filter, halfKernelSize:  " << order << std::endl;
         p = grabber->createFilter("Voxel::MedianFilter", DepthCamera::FRAME_RAW_FRAME_PROCESSED);
-        if (!p) 
+        if (!p)
             logger(LOG_ERROR) << "Failed to get MedianFilter" << std::endl;
         p->set("deadband", 0.0f);
         p->set("halfKernelSize", halfKernelSize);
@@ -130,7 +133,7 @@ int main(int argc, char** argv)
     if(flypixThr > 0) {
         std::cout << "Adding Flypix filter, threshold:  " << flypixThr << std::endl;
         p = grabber->createFilter("Voxel::FlypixFilter", DepthCamera::FRAME_RAW_FRAME_PROCESSED);
-        if (!p) 
+        if (!p)
             logger(LOG_ERROR) << "Failed to get FlypixFilter" << std::endl;
         p->set("threshold", flypixThr);
         grabber->addFilter(p, DepthCamera::FRAME_RAW_FRAME_PROCESSED);
@@ -138,7 +141,7 @@ int main(int argc, char** argv)
     if(sigma > 0) {
         std::cout << "Adding bilateral filter, sigma:  " << sigma << std::endl;
         p = grabber->createFilter("Voxel::BilateralFilter", DepthCamera::FRAME_RAW_FRAME_PROCESSED);
-        if (!p) 
+        if (!p)
             logger(LOG_ERROR) << "Failed to get BilateralFilter" << std::endl;
         p->set("sigma", sigma);
         grabber->addFilter(p, DepthCamera::FRAME_RAW_FRAME_PROCESSED);
@@ -146,7 +149,7 @@ int main(int argc, char** argv)
     if(bDarkPixEnable) {
         std::cout << "Adding dark pixel filter:  " << std::endl;
         p = grabber->createFilter("Voxel::DarkPixFilter", DepthCamera::FRAME_RAW_FRAME_PROCESSED);
-        if (!p) 
+        if (!p)
             logger(LOG_ERROR) << "Failed to get DarkPixFilter" << std::endl;
         grabber->addFilter(p, DepthCamera::FRAME_RAW_FRAME_PROCESSED);
     }
@@ -158,6 +161,10 @@ int main(int argc, char** argv)
         laser_pub = n.advertise<sensor_msgs::LaserScan>(laserTopic.c_str(), 1);
     if (pclTopic.c_str())
         cloud_pub = n.advertise<sensor_msgs::PointCloud2>(pclTopic.c_str(), 1);
+    if (depthTopic.c_str())
+        image_pub = n.advertise<sensor_msgs::Image>(depthTopic.c_str(), 1);
+    if (intensityTopic.c_str())
+        image_intensity_pub = n.advertise<sensor_msgs::Image>(intensityTopic.c_str(), 1);
 
     int count = 0;
     ros::Rate r(frameRate);
@@ -169,7 +176,7 @@ int main(int argc, char** argv)
     laser.angle_increment = (laser.angle_max - laser.angle_min)/width;
     laser.scan_time = 1.0/frameRate;
     laser.range_min = minRange;
-    laser.range_max = maxRange;     
+    laser.range_max = maxRange;
     laser.ranges.resize(width);
     laser.intensities.resize(width);
 
@@ -177,15 +184,29 @@ int main(int argc, char** argv)
     sensor_msgs::PointCloud2 cloud2;
     cloud.header.frame_id = laser.header.frame_id;
 
+    sensor_msgs::Image image;
+    image.header.frame_id = laser.header.frame_id;
+    image.encoding = "32FC1";
+    image.height = 240;
+    image.width = 320;
+    image.step  = 320 * sizeof (float);
+
+    sensor_msgs::Image image_intensity;
+    image_intensity.header.frame_id = laser.header.frame_id;
+    image_intensity.encoding = "32FC1";
+    image_intensity.height = 240;
+    image_intensity.width = 320;
+    image_intensity.step  = 320 * sizeof (float);
+
     while(n.ok())
     {
         laser.header.stamp = ros::Time::now();
         cloud.header.stamp = laser.header.stamp;
 
-        if (grabber->getFrameCount() > 0) 
+        if (grabber->getFrameCount() > 0)
         {
             XYZIPointCloudFrame *pclFrame = grabber->getXYZIFrame();
-    
+
             // Laser scan
 
             if (laserTopic.c_str())
@@ -203,9 +224,9 @@ int main(int argc, char** argv)
                             float px = pclFrame->points[idx].x;
                             float py = pclFrame->points[idx].y;
                             float pz = pclFrame->points[idx].z;
-                            float range = sqrt(px*px+py*py+pz*pz); 
+                            float range = sqrt(px*px+py*py+pz*pz);
                             float amplitude = pclFrame->points[idx].i;
-                            
+
                             if (range > 0 && range < minDist)
                             {
                                 minDist = range;
@@ -222,10 +243,10 @@ int main(int argc, char** argv)
             }
 
 
-            // Point Cloud 
+            // Point Cloud
             if (pclTopic.c_str())
             {
-                if (pclFrame) 
+                if (pclFrame)
                 {
                     int num_points = pclFrame->points.size();
                     cloud.points.resize(num_points);
@@ -242,13 +263,13 @@ int main(int argc, char** argv)
                         cloud.points[i].y = -pclFrame->points[i].x;
                         cloud.points[i].z = -pclFrame->points[i].y;
                         cloud.channels[0].values[i] = gain * pclFrame->points[i].i;
-                        if (abs(cloud.points[i].x) > maxRange) 
+                        if (abs(cloud.points[i].x) > maxRange)
                         {
-                            cloud.points[i].x = 0; 
+                            cloud.points[i].x = 0;
                             cloud.points[i].y = 0;
                             cloud.points[i].z = 0;
                             cloud.channels[0].values[i] = 0;
-                        } 
+                        }
                     }
 
                     sensor_msgs::convertPointCloudToPointCloud2(cloud, cloud2);
@@ -256,18 +277,46 @@ int main(int argc, char** argv)
 
                 } // if (pclFrame)
             }
-                
-            if (pclFrame)    
+
+            if (pclFrame)
                 delete pclFrame;
+
+            DepthFrame *depthFrame = grabber->getDepthFrame();
+            // Depth Picture
+            if (depthTopic.c_str())
+            {
+                if (depthFrame)
+                {
+                    size_t image_size = sizeof (float) * depthFrame->depth.size();
+                    image.data.resize (image_size);
+                    memcpy (&image.data[0], &depthFrame->depth[0], image_size);
+                    image_pub.publish(image);
+
+                } // if (pclFrame)
+            }
+            if (intensityTopic.c_str())
+            {
+                if (depthFrame)
+                {
+                    size_t image_size = sizeof (float) * depthFrame->amplitude.size();
+                    image_intensity.data.resize (image_size);
+                    memcpy (&image_intensity.data[0], &depthFrame->amplitude[0], image_size);
+                    image_intensity_pub.publish(image_intensity);
+
+                } // if (pclFrame)
+            }
+
+            if (depthFrame)
+                delete depthFrame;
 
             r.sleep();
             ++count;
         }
     }
-  
+
 }
 
 
-#endif // TI3DTOF_SENSOR 
+#endif // TI3DTOF_SENSOR
 /*! @} */
 
